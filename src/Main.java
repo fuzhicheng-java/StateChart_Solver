@@ -12,6 +12,7 @@ public class Main {
 			statechart.traceFailedPath_Constant(failed_path);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
