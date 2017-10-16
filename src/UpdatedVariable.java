@@ -1,6 +1,8 @@
 import java.util.LinkedList;
 
 public class UpdatedVariable {
+	public int type; //1 state, 2 transition
+	public String location;// id
 	public String name;
 	LinkedList<String> usedVariables=new LinkedList<>();
 	

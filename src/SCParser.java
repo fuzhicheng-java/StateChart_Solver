@@ -153,7 +153,11 @@ public class SCParser {
 											}
 											state.addUpdatedVariable(upvar);
 											Variable.addUpdatedState(statechart, upvar.name, state.id);
+											
 											Variable.updateBeUpdated(statechart, upvar.name);
+											upvar.type=1;
+											upvar.location=state.id;
+											Variable.addUsedVariable(statechart, upvar);
 										}
 									}
 
@@ -239,6 +243,9 @@ public class SCParser {
 															temp_transition.addUpdatedVariable(tupvar);
 															Variable.addUpdatedTransition(statechart, tupvar.name, temp_transition.id);
 															Variable.updateBeUpdated(statechart, tupvar.name);
+															tupvar.type=1;
+															tupvar.location=state.id;
+															Variable.addUsedVariable(statechart, tupvar);
 														}
 													}
 
@@ -329,6 +336,8 @@ public class SCParser {
 		//specification_trans=specification_trans.replaceAll("entry/", "");
 		return specification_trans;
 	}
+	
+	
 	public void initVariables_Events(Document doc, Statechart statechart) {
 		NodeList variables = doc.getElementsByTagName("sgraph:Statechart");
 		for (int i = 0; i < variables.getLength(); i++) {

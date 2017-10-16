@@ -306,6 +306,106 @@ public class Statechart {
 
 		}
 	}
+	
+	
+	
+	public void getSingleVariableImpactionInfo_Tree(String name, int start) {
+		// TODO Auto-generated method stub
+		if (this.variables.size() > 0) {
+			for (Variable var : this.variables) {
+				//System.out.println(var.name);
+				if (var.name.equals(name)) 
+				{
+					if (var.used_variables.size() == 0&&start==0) {
+						System.out.println("The variable " + var.name+" has not other related variables.");
+					} else if(start==0) {
+						System.out.println("The variable " + var.name
+								+ " has following related variables:");
+					}
+					
+					if (var.used_variables.size() > 0) {
+
+						for (String item : var.updated_states) {
+							State state = this.getFullState(item);
+							if (state != null) {
+								System.out.println("In the region " + state.domain_name + ", in the state "
+										+ state.name + ", variable " + var.name+ " is been updated");
+
+							}
+						}
+					}
+					
+					if (var.updated_transitions.size() > 0) {
+
+						for (String item : var.updated_transitions) {
+							Transition transition = this.getFullTranistion(item);
+							if (transition != null) {
+								System.out.println("In the region " + transition.domain_name
+										+ ", on the transition from state " + transition.from_state_name
+										+ " to state " + transition.to_state_name + ", variable " + var.name
+										+ " is been updated");
+
+							}
+						}
+					}
+					
+					
+					if (var.used_states.size() > 0) {
+
+						for (VarRelation item : var.used_states) {
+							State state = this.getFullState(item.id);
+							if (state != null) {
+								if (item.imp_var == null) {
+									System.out.println("In the region " + state.domain_name + ", in the state "
+											+ state.name + ", variable " + var.name
+											+ " is been used in the entry conditional statement");
+								} else {
+									if (item.imp_var.contains("(") && item.imp_var.contains(")")) {
+										System.out.println("In the region " + state.domain_name + ", in the state "
+												+ state.name + ", variable " + item.imp_var
+												+ " is been updated with the operation " + var.name);
+									} else {
+										System.out.println("In the region " + state.domain_name + ", in the state "
+												+ state.name + ", variable " + item.imp_var
+												+ " is been updated with the variable " + var.name);
+									}
+
+								}
+
+							}
+						}
+
+						// System.out.println("The variable "+var+" can be treated as constant variable,
+						// and the impacted objects are listed as following:");
+
+					}
+
+					if (var.used_transitions.size() > 0) {
+						for (VarRelation item : var.used_transitions) {
+							Transition transition = this.getFullTranistion(item.id);
+							if (transition != null) {
+								if (item.imp_var == null) {
+									System.out.println("In the region " + transition.domain_name
+											+ ", on the transition from state " + transition.from_state_name
+											+ " to state " + transition.to_state_name + ", variable " + var.name
+											+ " is used as part of conditional statement!");
+								} else {
+									System.out.println("In the region " + transition.domain_name
+											+ ", on the transition from state " + transition.from_state_name
+											+ " to state " + transition.to_state_name + ", variable " + item.imp_var
+											+ " is been updated with the variable " + var.name);
+								}
+							}
+						}
+					}
+					System.out.println("*************************************************************************");
+					System.out.println();
+					break;
+				}
+			}
+
+		}
+	}
 
 	private Transition getFullTranistion(String id) {
 		// TODO Auto-generated method stub

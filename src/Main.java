@@ -14,21 +14,30 @@ public class Main {
 			System.out.println("Please input function option:");
 			System.out.println("1. Show Constants or Implicit Constants in the Statechart");
 			System.out.println("2. Show Single Variable Impaction");
+			System.out.println("3. Show Single Variable Tree Structure");
 			Scanner scanner=new Scanner(System.in);
 			while (true) {
 				int option = scanner.nextInt();
 
 				if (option == 1) {
 					statechart.getUnChangedVariablesInfo();
-				} else {
+				} else if(option==2){
 					System.out.println("Please input the name of variable/event/operation:");
 					String name=scanner.next();
 					statechart.getSingleVariableImpactionInfo(name);
+				}
+				else if(option==3)
+				{
+					System.out.println("Please input the name of variable:");
+					String name=scanner.next();
+					Tree tree=new Tree(name);
+					tree.initVariableImpactTreeStructure(statechart, name);
 				}
 				
 				System.out.println("Please input function option:");
 				System.out.println("1. Show Constants or Implicit Constants in the Statechart");
 				System.out.println("2. Show Single Variable Impaction");
+				System.out.println("3. Show Single Variable Tree Structure");
 			}
 			
 		} catch (Exception e) {

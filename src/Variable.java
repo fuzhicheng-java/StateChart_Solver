@@ -12,7 +12,8 @@ public class Variable {
 	public HashSet<String> updated_states=new HashSet<>();
 	public HashSet<String> updated_transitions=new HashSet<>();;
 	public HashSet<VarRelation> used_states=new HashSet<>();;
-	public HashSet<VarRelation> used_transitions=new HashSet<>();; 
+	public HashSet<VarRelation> used_transitions=new HashSet<>();
+	public HashSet<UpdatedVariable> used_variables=new HashSet<>();
 	public boolean beUpdated=false;
 	public int type=0; // type is indicate is operation
 	public Variable(String domain_id,String domain_name,  String name, int isConsant)
@@ -33,6 +34,22 @@ public class Variable {
 		    	if(item.name.equals(var))
 		    	{
 		    		item.beUpdated=true;
+		    		break;
+		    	}
+		    }
+		}
+	}
+	
+	
+	public static void addUsedVariable(Statechart st, UpdatedVariable var)
+	{
+		if(st.variables!=null&&st.variables.size()>0)
+		{
+		    for(Variable item: st.variables)
+		    {
+		    	if(item.name.equals(var.name))
+		    	{
+		    		item.used_variables.add(var);
 		    		break;
 		    	}
 		    }
