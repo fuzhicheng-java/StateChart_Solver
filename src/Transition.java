@@ -6,6 +6,9 @@ public class Transition {
 	public static int outgoing=2, incoming=1;
 	public String from_state;
 	public String to_state; 
+	public String from_state_name;
+	public String to_state_name; 
+	public String domain_name;
 	public String id;
 	public LinkedList<String> raised_events=new LinkedList<>();
 	public HashSet<UpdatedVariable> updated_variables=new HashSet<>();

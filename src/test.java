@@ -4,12 +4,8 @@ public class test {
 	
 	public static void main(String[] args)
 	{
-		String te="entry/c-m";
-		String[] result=te.split("[-+*/^%!]");
-		for(String s:result)
-		{
-			System.out.println(s);
-		}
+		String te="08";
+		System.out.println(Integer.parseInt(te));
 		
 	}
 }

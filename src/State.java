@@ -11,7 +11,7 @@ public class State {
 	public HashSet<String> incoming_transitions=new HashSet<>();
 	public HashSet<String> outgoing_transitions=new HashSet<>();
 	public HashSet<String> raised_events=new HashSet<>();
-	
+	public HashSet<String> usedVariableInEntryCondition=new HashSet<>();
 	public HashSet<UpdatedVariable> updated_variables=new HashSet<>();
 	
 	public State(String domain_id, String domain_name, String id ,String name)
@@ -25,6 +25,11 @@ public class State {
 	public void addUpdatedVariable(UpdatedVariable var)
 	{
 		this.updated_variables.add(var);
+	}
+	
+	public void addUsedVariableInEntryCondition(String var)
+	{
+		this.usedVariableInEntryCondition.add(var);
 	}
 
 	
