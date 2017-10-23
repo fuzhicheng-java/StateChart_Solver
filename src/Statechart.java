@@ -1,12 +1,26 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 public class Statechart {
 
+	private static final int supportFactor = 3;
 	public LinkedList<State> states = new LinkedList<>();
 	public LinkedList<Transition> transitions = new LinkedList<>();
 	public LinkedList<Event> events = new LinkedList<>();
 	public LinkedList<Variable> variables = new LinkedList<>();
-
+	public Map<HashSet<String>, Integer> actionMap=new HashMap();
+   // public LinkedList<ActionSet> actionSets=new LinkedList<>();
 	public void addState(State state) {
 		this.states.add(state);
 	}
@@ -147,15 +161,11 @@ public class Statechart {
 							if (state != null) {
 								if(item.imp_var==null)
 								{
-									if (item.imp_var.contains("(") && item.imp_var.contains(")")) {
-										System.out.println("In the region " + state.domain_name + ", in the state "
-												+ state.name + ", operation " + var.name
-												+ " is been used in the entry conditional statement");
-									} else {
+									
 										System.out.println("In the region " + state.domain_name + ", in the state "
 												+ state.name + ", variable " + var.name
 												+ " is been used in the entry conditional statement");
-									}
+									
 								}
 								else
 								{
@@ -406,6 +416,151 @@ public class Statechart {
 
 		}
 	}
+	
+	public void initExecutionPattern()
+	{
+		
+	    if(this.states!=null&&this.states.size()>0)
+	    {
+	    	for(State st:this.states)
+	    	{
+	    		if(st.actionSet.size()>=2&&actionMap.containsKey(st.actionSet))
+				{
+					int value= (int) actionMap.get(st.actionSet)+1;
+					actionMap.put(st.actionSet, value);
+					//break;
+				}
+	    		else
+	    		{
+	    			if(st.actionSet.size()>=2)
+	    			{
+	    				actionMap.put(st.actionSet, 1);
+	    			}
+	    	    	
+	    	    	
+	    		}
+	    	}
+	    	
+	    }
+	    
+	    if(this.transitions!=null&&this.transitions.size()>0)
+	    {
+
+	    	for(int i=0;i<this.transitions.size();i++)
+	    	{
+	    		Transition tran=this.transitions.get(i);
+	    		
+	    		if(tran.actionSet.size()>=2&&actionMap.containsKey(tran.actionSet))
+				{
+					int value= (int) actionMap.get(tran.actionSet)+1;
+					actionMap.put(tran.actionSet, value);
+					//break;
+				}
+	    		else
+	    		{
+	    			if(tran.actionSet.size()>=2)
+	    			{
+	    				actionMap.put(tran.actionSet, 1);
+	    			}
+	    	    	//actionMap.put(tran.actionSet, 1);
+	    	    	
+	    		}
+	    	}
+	    	
+	    }
+	}
+	
+	
+	public void validateExecutionPattern()
+	{
+	    if(this.states!=null&&this.states.size()>0)
+	    {
+	    	for(State st:this.states)
+	    	{
+	    		if(st.actionSet.size()>=2)
+				{
+	    			
+					if(this.actionMap.keySet().size()>0)
+					{
+						String out="";
+						for(HashSet<String> key:this.actionMap.keySet())
+						{
+							int support = this.actionMap.get(key);
+							if (support >= Statechart.supportFactor) {
+								int sameFactor = key.size() / 2;
+								int sameNumber = CollectionUtils.intersection(key, st.actionSet).size();
+								if (sameNumber >= sameFactor && sameNumber < key.size()) {
+									
+									out+=key+"  ";
+								}
+							}
+						}
+						
+						if(!out.equals(""))
+						{
+							System.out.println("In the state" + st.name + ", the execution pattern "
+									+ st.actionSet + " may be not correct compared with pattern " + out);
+						}
+					}
+				}
+	    		
+	    	}
+	    	
+	    }
+	    
+	    if(this.transitions!=null&&this.transitions.size()>0)
+	    {
+
+	    	for(Transition tran:this.transitions)
+	    	{
+	    		if(tran.actionSet.size()>=2)
+				{
+	    			
+					if(this.actionMap.keySet().size()>0)
+					{
+						String out="";
+						for(HashSet<String> key:this.actionMap.keySet())
+						{
+							int support=this.actionMap.get(key);
+							if (support >= Statechart.supportFactor) {
+								int sameFactor =  key.size()/ 2;
+								int sameNumber = CollectionUtils.intersection(key, tran.actionSet).size();
+								if (sameNumber >= sameFactor && sameNumber < key.size()) {
+									
+									out+=key+"  ";
+								}
+							}
+						}
+						if(!out.equals(""))
+						{
+							Transition newT=this.getFullTranistion(tran.id);
+							System.out.println("In the transition from state " + newT.from_state_name
+									+ " to state " + newT.to_state_name + ", the execution pattern "
+									+ tran.actionSet + " may be not correct compared with pattern " + out);
+						}
+					}
+				}
+	    	}
+	    	
+	    }
+	}
+	
+	public void getExecutionPattern()
+	{
+		Iterator it = this.actionMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<HashSet<String>, Integer> pair =(Entry<HashSet<String>, Integer>) it.next();
+			if(pair.getValue()>= Statechart.supportFactor)
+			{
+				System.out.println(pair.getKey() + " can be treated as implicit execution pattern with support value " + pair.getValue());
+			}
+			
+			//it.remove(); // avoids a ConcurrentModificationException
+		}
+		System.out.println();
+	}
+	
+	
 
 	private Transition getFullTranistion(String id) {
 		// TODO Auto-generated method stub
@@ -444,6 +599,78 @@ public class Statechart {
 			}
 		}
 		return false;
+	}
+
+	public void generateConfigurableStatechart(String path, String file, String name) {
+		BufferedReader br = null;
+		FileReader fr = null;
+
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+		try {
+
+			//br = new BufferedReader(new FileReader(FILENAME));
+			String newfile=path+"new_statechart.sct";
+			fr = new FileReader(file);
+			br = new BufferedReader(fr);
+			fw = new FileWriter(newfile);
+			bw = new BufferedWriter(fw);
+
+			String newName="";
+			if(name.contains("."))
+			{
+				String[] names=name.split("\\.");
+				newName=names[0]+".get_"+names[1]+"()";
+			}
+			else
+			{
+				newName="get_"+name+"()";
+			}
+			String line;
+
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+				if(line.contains("<sgraph:Statechart"))
+				{
+					String[] alls=line.split("&#xA;");
+					for(String item:alls)
+					{
+						//if()
+					}
+					System.out.println("tetst!");
+				}
+				//bw.write(sCurrentLine.replaceAll(name, newName));
+			}
+			System.out.println("New Statechart has been generated!");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		} finally {
+
+			try {
+
+				if (br != null)
+					br.close();
+
+				if (fr != null)
+					fr.close();
+				if (bw != null)
+					bw.close();
+
+				if (fw != null)
+					fw.close();
+
+			} catch (Exception ex) {
+
+				ex.printStackTrace();
+
+			}
+
+		}
+
+		
 	}
 
 	

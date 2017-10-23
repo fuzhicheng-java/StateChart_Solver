@@ -13,7 +13,7 @@ public class State {
 	public HashSet<String> raised_events=new HashSet<>();
 	public HashSet<String> usedVariableInEntryCondition=new HashSet<>();
 	public HashSet<UpdatedVariable> updated_variables=new HashSet<>();
-	
+	public HashSet<String> actionSet=new HashSet<>();
 	public State(String domain_id, String domain_name, String id ,String name)
 	{
 		this.domain_id=domain_id;
@@ -47,4 +47,10 @@ public class State {
 	{
 		this.outgoing_transitions.add(item);
 	}
+	
+	public void addActionSet(String name)
+	{
+		this.actionSet.add(name);
+	}
+	
 }

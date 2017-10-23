@@ -41,19 +41,25 @@ public class SCParser {
 						String sname = eElement_state.getAttribute("name");
 						String sid = eElement_state.getAttribute("xmi:id");
 						State state = new State(domain_id, domain_name, sid, sname);
-
+						//state.ac
 						String specification = eElement_state.getAttribute("specification");
 						if (specification != null && !specification.equals("")) {
 							specification=this.replaceSymbols(specification);
 							specification=specification.replaceAll("\nentry", ";entry");
+							specification=specification.replaceAll("\noncycle", ";oncycle");
 							specification=specification.replaceAll("\nexit", ";exit");
 							specification=specification.replaceAll("\n", "");
 							specification=specification.replaceAll("\r", "");
 							specification=specification.replaceAll("\\s+", "");
 							
+							if(specification.contains("oncycle"))
+							{
+								System.out.println("test Done!");
+							}
 							String[] infos = specification.split(";");
 							if (infos.length > 0) {
-								for (String item : infos) {
+								for (String item : infos) 
+								{
 									item=item.replaceAll("entry/", "");
 									item=item.replaceAll("oncycle/", "");
 									item=item.replaceAll("exit/", "");
@@ -114,8 +120,10 @@ public class SCParser {
 										String[] iteminfo = item.split("\\s+");
 										String vname = iteminfo[1];
 										state.addRaisedEvent(vname);
+										state.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 									} else {
 										if (item.contains("=")) {
+											state.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 											item = replaceSymbolsCalculation(item);
 											String[] iteminfo = item.split("=");
 											UpdatedVariable upvar = new UpdatedVariable(iteminfo[0].trim());
@@ -124,7 +132,7 @@ public class SCParser {
 												if (!var.equals("")) {
 													if(var.contains("(")&&var.contains(")"))
 													{
-														String[] test1=var.split("(");
+														String[] test1=var.split("\\(");
 														upvar.addUsedVariable(test1[0].trim()+"()");
 														String used1 = var
 																.substring(var.indexOf("(") + 1);
@@ -199,11 +207,13 @@ public class SCParser {
 											if (infos.length > 0) {
 												for (String item : infos) {
 													if (item.startsWith("raise")) {
+														temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 														String[] iteminfo = item.split("\\s+");
 														String vname = iteminfo[1];
-														temp_transition.addRaisedEvent(vname.trim());
+														temp_transition.addRaisedEvent(vname.replaceAll("\\s+",""));
 													} else {
 														if (item.contains("=")) {
+															temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 															item = replaceSymbolsCalculation(item);
 															String[] iteminfo = item.split("=");
 															
