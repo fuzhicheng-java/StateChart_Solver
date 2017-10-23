@@ -4,12 +4,20 @@ public class Main {
 
 	public static void main(String[] args)
 	{
-		String model_file_pre="C:\\Users\\DaoDao\\Desktop\\statechart\\";
+		String file_path="";
+		if(System.getProperty("os.name").startsWith("Windows"))
+		{
+			file_path="C:\\Users\\DaoDao\\Desktop\\statechart\\";
+		}
+		else
+		{
+			file_path="/Users/daodao/git/StateChart_Solver/statechart/";
+		}
 		String failed_path="_wWau0JwjEeeYAr1R4dqAHw _XyDBIJwjEeeYAr1R4dqAHw _73A5oJwiEeeYAr1R4dqAHw _jjGC0pwiEeeYAr1R4dqAHw";
 		Statechart statechart=new Statechart();
 		SCParser sp=new SCParser();
 		try {
-			sp.readStatechart(model_file_pre+"CardiacArrestCombo.sct", statechart);
+			sp.readStatechart(file_path+"CardiacArrestCombo.sct", statechart);
 			statechart.initExecutionPattern();
 			//statechart.traceFailedPath_Constant(failed_path);
 			System.out.println("Please input function option:");
@@ -51,7 +59,7 @@ public class Main {
 				{
 					System.out.println("Please input the name of variable you want to change to configurable variable:");
 					String name=scanner.next();
-					statechart.generateConfigurableStatechart(model_file_pre, model_file_pre+"CardiacArrestCombo.sct", name);
+					statechart.generateConfigurableStatechart(file_path, file_path+"CardiacArrestCombo.sct", name);
 				}
 				
 				System.out.println("Please input function option:");
