@@ -439,33 +439,50 @@ public class Statechart {
 		}
 	}
 
-	public void generateNodeTrace(State targetState, State entry) {
-		if (!targetState.id.equals(entry.id)) {
-			if (targetState.incoming_transitions.size() > 0) {
-				for (String tid : targetState.incoming_transitions) {
-					Transition ts = this.getTransition(tid);
-					if (ts!=null&&!ts.from_state.equals(entry.id)) {
+	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents) {
+		boolean isEntry = false;
 
-						SubNode node = new SubNode();
-						State nextstate = this.getState(ts.from_state);
-						node.transition = ts;
-						node.state = nextstate;
-						if (ts.used_events.size() > 0) {
-							for (String event : ts.used_events) {
-								node.events.add(event);
-							}
-						}
+		if (targetState.incoming_transitions.size() > 0) {
 
-						if (nextstate.used_events.size() > 0) {
-							for (String event : nextstate.used_events) {
-								node.events.add(event);
-							}
+			for (String tid : targetState.incoming_transitions) {
+				Transition ts = this.getTransition(tid);
+				if (ts != null && entry.id.equals(ts.from_state)) {
+					isEntry = true;
+					break;
+				}
+			}
+			if (isEntry) {
+				return;
+			} else {
+				System.out.println("Parent State " + targetState.name);
+			}
+
+			for (String tid : targetState.incoming_transitions) {
+				Transition ts = this.getTransition(tid);
+				if (ts != null && !targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
+
+					SubNode node = new SubNode();
+					State nextstate = this.getState(ts.from_state);
+					node.transition = ts;
+					node.state = nextstate;
+					if (ts.used_events.size() > 0) {
+						for (String event : ts.used_events) {
+							node.events.add(event);
 						}
-						targetState.nodes.add(node);
-						this.generateNodeTrace(nextstate, entry);
 					}
 
+					if (nextstate.used_events.size() > 0) {
+						for (String event : nextstate.used_events) {
+							node.events.add(event);
+						}
+					}
+					targetState.nodes.add(node);
+					parents.add(targetState.id);
+
+					this.generateNodeTrace(nextstate, entry, parents);
+					System.out.println("State " + node.state.name);
 				}
+
 			}
 		}
 	}
@@ -602,7 +619,8 @@ public class Statechart {
 						{
 							if(!state.hasOutGoingStateExceptGivenState(temp.entryState, this))
 							{
-								this.generateNodeTrace(state, temp.entryState);
+								HashSet<String> parents=new HashSet<>();
+								this.generateNodeTrace(state, temp.entryState, parents);
 								writer.write("<node name=\""+state.name+"\">");
 								writer.newLine();
 								printFaultTree(writer, state);

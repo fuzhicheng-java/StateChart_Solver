@@ -42,7 +42,11 @@ public class SCParser {
 						String sid = eElement_state.getAttribute("xmi:id");
 						String entry=eElement_state.getAttribute("xsi:type");
 						State state = new State(domain_id, domain_name, sid, sname, entry);
-						s_region.entryState=state;
+						if(state.isEntry==1)
+						{
+							s_region.entryState=state;
+						}
+						
 						String specification = eElement_state.getAttribute("specification");
 						state.specification=specification;
 						if (specification != null && !specification.equals("")) {
