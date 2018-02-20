@@ -64,11 +64,13 @@ public class Main {
 				}
 				else if(option==7)
 				{
-//					System.out.println("Please input the name of variable you want to change to configurable variable:");
-//					String name=scanner.next();
+					System.out.println("Please input the name of region you want to explore");
+					String regionName=scanner.next();
+					System.out.println("Please input the name of state you want to generate fault tree");
+					String nodeName=scanner.next();
 //					statechart.generateConfigurableStatechart(file_path, file_path+"CardiacArrestCombo.sct", name);
 					String path="C:\\Users\\DaoDao\\Desktop\\statechart\\fault_tree.xml";
-					statechart.generateFaultTree(path, null);
+					statechart.generateFaultTree(path, regionName, nodeName);
 				}
 				
 				System.out.println("Please input function option:");

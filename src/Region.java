@@ -14,4 +14,29 @@ public class Region {
 		this.id=id;
 		this.name=name;
 	}
+
+	public void updateFakeEntryState(Statechart statechart) {
+		// TODO Auto-generated method stub
+	    String tid=null;
+		for(String key:this.entryState.outgoing_transitions)
+		{
+			tid=key;
+			break;
+		}
+		Transition ts=statechart.getTransition(tid);
+		State state=statechart.getState(ts.to_state);
+		this.entryState=state;
+	}
+	
+	public State getState(String name)
+	{
+		for(State temp:this.states)
+		{
+			if(temp.name.equals(name))
+			{
+				return temp;
+			}
+		}
+		return null;
+	}
 }

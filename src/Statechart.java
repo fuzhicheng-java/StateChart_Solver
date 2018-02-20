@@ -439,53 +439,7 @@ public class Statechart {
 		}
 	}
 
-	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents) {
-		boolean isEntry = false;
-
-		if (targetState.incoming_transitions.size() > 0) {
-
-			for (String tid : targetState.incoming_transitions) {
-				Transition ts = this.getTransition(tid);
-				if (ts != null && entry.id.equals(ts.from_state)) {
-					isEntry = true;
-					break;
-				}
-			}
-			if (isEntry) {
-				return;
-			} else {
-				System.out.println("Parent State " + targetState.name);
-			}
-
-			for (String tid : targetState.incoming_transitions) {
-				Transition ts = this.getTransition(tid);
-				if (ts != null && !targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
-
-					SubNode node = new SubNode();
-					State nextstate = this.getState(ts.from_state);
-					node.transition = ts;
-					node.state = nextstate;
-					if (ts.used_events.size() > 0) {
-						for (String event : ts.used_events) {
-							node.events.add(event);
-						}
-					}
-
-					if (nextstate.used_events.size() > 0) {
-						for (String event : nextstate.used_events) {
-							node.events.add(event);
-						}
-					}
-					targetState.nodes.add(node);
-					parents.add(targetState.id);
-
-					this.generateNodeTrace(nextstate, entry, parents);
-					System.out.println("State " + node.state.name);
-				}
-
-			}
-		}
-	}
+	
 	public void validateExecutionPattern() {
 		if (this.states != null && this.states.size() > 0) {
 			for (State st : this.states) {
@@ -602,22 +556,71 @@ public class Statechart {
 	}
 
 	
-	public void generateFaultTree(String path, String nodeName) throws Exception
+	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents) {
+		boolean isEntry = false;
+
+		if (targetState.incoming_transitions.size() > 0) {
+
+			for (String tid : targetState.incoming_transitions) {
+				Transition ts = this.getTransition(tid);
+				if (ts != null && entry.id.equals(ts.from_state)) {
+					isEntry = true;
+					break;
+				}
+			}
+			if (isEntry) {
+				return;
+			} else {
+				System.out.println("Parent State " + targetState.name);
+			}
+
+			for (String tid : targetState.incoming_transitions) {
+				Transition ts = this.getTransition(tid);
+				if (ts != null && !targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
+
+					SubNode node = new SubNode();
+					State nextstate = this.getState(ts.from_state);
+					node.transition = ts;
+					node.state = nextstate;
+					if (ts.used_events.size() > 0) {
+						for (String event : ts.used_events) {
+							node.events.add(event);
+						}
+					}
+
+					if (nextstate.used_events.size() > 0) {
+						for (String event : nextstate.used_events) {
+							node.events.add(event);
+						}
+					}
+					targetState.nodes.add(node);
+					parents.add(targetState.id);
+
+					this.generateNodeTrace(nextstate, entry, parents);
+					System.out.println("State " + node.state.name);
+				}
+
+			}
+		}
+	}
+	
+	public void generateFaultTree(String path, String regionName, String nodeName) throws Exception
 	{
 		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-		if(nodeName==null)
+		if(regionName==null&&nodeName==null)
 		{
 			if(this.regions.size()>0)
 			{
 				for(Region temp:this.regions)
 				{
+					temp.updateFakeEntryState(this);
 					writer.write("<region name=\""+temp.name+"\">");
 					if(temp.states.size()>0)
 					{
 						
 						for(State state:temp.states)
 						{
-							if(!state.hasOutGoingStateExceptGivenState(temp.entryState, this))
+							if(state.isEntry==0&&!state.hasOutGoingStateExceptGivenState(temp.entryState, this))
 							{
 								HashSet<String> parents=new HashSet<>();
 								this.generateNodeTrace(state, temp.entryState, parents);
@@ -628,6 +631,29 @@ public class Statechart {
 								writer.newLine();
 							}
 						}
+					}
+					writer.write("</region>");
+				}
+			}
+		}
+		else
+		{
+			for(Region temp:this.regions)
+			{
+				if(temp.name.equals(temp.name))
+				{
+					temp.updateFakeEntryState(this);
+					writer.write("<region name=\""+temp.name+"\">");
+					if(temp.states.size()>0)
+					{
+						State targetState=temp.getState(nodeName);
+						HashSet<String> parents=new HashSet<>();
+						this.generateNodeTrace(targetState, temp.entryState, parents);
+						writer.write("<node name=\""+targetState.name+"\">");
+						writer.newLine();
+						printFaultTree(writer, targetState);
+						writer.write("</node>");
+						writer.newLine();
 					}
 					writer.write("</region>");
 				}
@@ -698,6 +724,7 @@ public class Statechart {
 		}
 		return result;
 	}
+
 	
 	public void generateConfigurableStatechart(String path, String file, String name) {
 		BufferedReader br = null;

@@ -75,6 +75,10 @@ public class State {
 	
 	public boolean hasOutGoingStateExceptGivenState(State state, Statechart statechart)
 	{
+		if(this.id.equals(state.id))
+		{
+			return true;
+		}
 		if(this.outgoing_transitions.size()>0)
 		{
 			for(String tid:this.outgoing_transitions)
