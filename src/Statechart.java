@@ -563,7 +563,7 @@ public class Statechart {
 
 			for (String tid : targetState.incoming_transitions) {
 				Transition ts = this.getTransition(tid);
-				if (ts != null && entry.id.equals(ts.from_state)) {
+				if (ts != null && entry.id.equals(ts.from_state)&&!ts.hasAlways&&!ts.specification.contains("always")&&!targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
 					isEntry = true;
 					break;
 				}
@@ -571,7 +571,7 @@ public class Statechart {
 			if (isEntry) {
 				return;
 			} else {
-				System.out.println("Parent State " + targetState.name +" at level "+level);
+				System.out.println("Parent State " + targetState.name +" --------at level "+level);
 			}
 
 			for (String tid : targetState.incoming_transitions) {
@@ -597,7 +597,7 @@ public class Statechart {
 					parents.add(targetState.id);
 					if(node.events.size()>0)
 					{
-						System.out.print("####events required: at node( "+node.state.name+")#####" );
+						System.out.print("####events required: at state( "+node.state.name+"):::" );
 						for(String event:node.events)
 						{
 							System.out.print(event+"  " );
@@ -606,7 +606,7 @@ public class Statechart {
 					}
 					
 					this.generateNodeTrace(nextstate, entry, parents, level+1);
-					System.out.println("State " + node.state.name +"  at level "+level);
+					System.out.println("State " + node.state.name +"--------at level "+level);
 					
 				}
 
