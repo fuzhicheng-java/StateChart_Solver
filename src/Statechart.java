@@ -559,7 +559,7 @@ public class Statechart {
 	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents) {
 		boolean isEntry = false;
 
-		if (targetState.incoming_transitions.size() > 0) {
+		if (targetState!=null&&targetState.incoming_transitions.size() > 0) {
 
 			for (String tid : targetState.incoming_transitions) {
 				Transition ts = this.getTransition(tid);
@@ -647,13 +647,17 @@ public class Statechart {
 					if(temp.states.size()>0)
 					{
 						State targetState=temp.getState(nodeName);
-						HashSet<String> parents=new HashSet<>();
-						this.generateNodeTrace(targetState, temp.entryState, parents);
-						writer.write("<node name=\""+targetState.name+"\">");
-						writer.newLine();
-						printFaultTree(writer, targetState);
-						writer.write("</node>");
-						writer.newLine();
+						if(targetState!=null)
+						{
+							HashSet<String> parents=new HashSet<>();
+							this.generateNodeTrace(targetState, temp.entryState, parents);
+							writer.write("<node name=\""+targetState.name+"\">");
+							writer.newLine();
+							printFaultTree(writer, targetState);
+							writer.write("</node>");
+							writer.newLine();
+						}
+						
 					}
 					writer.write("</region>");
 				}
