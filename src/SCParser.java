@@ -16,7 +16,6 @@ public class SCParser {
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
 		doc.getDocumentElement().normalize();
-		// Statechart statechart = new Statechart();
 		System.out.println("Loading Statechart Model");
 		this.initVariables_Events(doc, statechart);
 		this.initStates(doc, statechart);
@@ -27,22 +26,25 @@ public class SCParser {
 	public void initStates(Document doc, Statechart statechart) {
 		NodeList regions = doc.getElementsByTagName("regions");
 		for (int i = 0; i < regions.getLength(); i++) {
+			
 			Node nNode = regions.item(i);
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element eElement = (Element) nNode;
 				String domain_name = eElement.getAttribute("name");
 				String domain_id = eElement.getAttribute("xmi:id");
+				Region s_region=new Region(domain_id, domain_name);
 				NodeList states = eElement.getElementsByTagName("vertices");
 				for (int j = 0; j < states.getLength(); j++) {
 					Node nNode_state = states.item(j);
 					if (nNode_state.getNodeType() == Node.ELEMENT_NODE) {
 						Element eElement_state = (Element) nNode_state;
-
 						String sname = eElement_state.getAttribute("name");
 						String sid = eElement_state.getAttribute("xmi:id");
-						State state = new State(domain_id, domain_name, sid, sname);
-						//state.ac
+						String entry=eElement_state.getAttribute("xsi:type");
+						State state = new State(domain_id, domain_name, sid, sname, entry);
+						s_region.entryState=state;
 						String specification = eElement_state.getAttribute("specification");
+						state.specification=specification;
 						if (specification != null && !specification.equals("")) {
 							specification=this.replaceSymbols(specification);
 							specification=specification.replaceAll("\nentry", ";entry");
@@ -56,6 +58,15 @@ public class SCParser {
 							{
 								System.out.println("test Done!");
 							}
+							
+							if (statechart.events.size() > 0) {
+								for (Event e : statechart.events) {
+									if (specification.contains(e.name)) {
+										state.addUsedEvent(e.name);
+									}
+								}
+							}
+							
 							String[] infos = specification.split(";");
 							if (infos.length > 0) {
 								for (String item : infos) 
@@ -119,6 +130,7 @@ public class SCParser {
 									if (item.startsWith("raise")) {
 										String[] iteminfo = item.split("\\s+");
 										String vname = iteminfo[1];
+										//Event event=new Event(vname, state.id, 1);
 										state.addRaisedEvent(vname);
 										state.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 									} else {
@@ -192,6 +204,7 @@ public class SCParser {
 									String targetid = eElement_transition.getAttribute("target");
 									Transition temp_transition = new Transition(tid, state.id, targetid);
 									String specification_trans = eElement_transition.getAttribute("specification");
+									temp_transition.specification=specification;
 									if (specification_trans!=null&&!specification_trans.equals("")) {
 										specification_trans=this.replaceSymbols(specification_trans);
 										String[] tempinfo1 = specification_trans.split("/");
@@ -210,7 +223,10 @@ public class SCParser {
 														temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
 														String[] iteminfo = item.split("\\s+");
 														String vname = iteminfo[1];
-														temp_transition.addRaisedEvent(vname.replaceAll("\\s+",""));
+														String ename=vname.replaceAll("\\s+","");
+														//Event event=new Event(ename, tid, 2);
+														temp_transition.addRaisedEvent(ename);
+														
 													} else {
 														if (item.contains("=")) {
 															temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
@@ -318,10 +334,12 @@ public class SCParser {
 
 							}
 						}
+						s_region.states.add(state);
 						statechart.addState(state);
 
 					}
 				}
+				statechart.regions.add(s_region);
 			}
 		}
 	}

@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,9 +18,11 @@ public class Statechart {
 	private static final int supportFactor = 3;
 	public LinkedList<State> states = new LinkedList<>();
 	public LinkedList<Transition> transitions = new LinkedList<>();
-	public LinkedList<Event> events = new LinkedList<>();
+	public HashSet<Event> events = new HashSet<>();
 	public LinkedList<Variable> variables = new LinkedList<>();
 	public Map<HashSet<String>, Integer> actionMap = new HashMap();
+	public LinkedList<Region> regions=new LinkedList<>();
+	public LinkedList<String> entryTransition=new LinkedList<>();
 
 	// public LinkedList<ActionSet> actionSets=new LinkedList<>();
 	public void addState(State state) {
@@ -436,6 +439,36 @@ public class Statechart {
 		}
 	}
 
+	public void generateNodeTrace(State targetState, State entry) {
+		if (!targetState.id.equals(entry.id)) {
+			if (targetState.incoming_transitions.size() > 0) {
+				for (String tid : targetState.incoming_transitions) {
+					Transition ts = this.getTransition(tid);
+					if (ts!=null&&!ts.from_state.equals(entry.id)) {
+
+						SubNode node = new SubNode();
+						State nextstate = this.getState(ts.from_state);
+						node.transition = ts;
+						node.state = nextstate;
+						if (ts.used_events.size() > 0) {
+							for (String event : ts.used_events) {
+								node.events.add(event);
+							}
+						}
+
+						if (nextstate.used_events.size() > 0) {
+							for (String event : nextstate.used_events) {
+								node.events.add(event);
+							}
+						}
+						targetState.nodes.add(node);
+						this.generateNodeTrace(nextstate, entry);
+					}
+
+				}
+			}
+		}
+	}
 	public void validateExecutionPattern() {
 		if (this.states != null && this.states.size() > 0) {
 			for (State st : this.states) {
@@ -551,6 +584,103 @@ public class Statechart {
 		return false;
 	}
 
+	
+	public void generateFaultTree(String path, String nodeName) throws Exception
+	{
+		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+		if(nodeName==null)
+		{
+			if(this.regions.size()>0)
+			{
+				for(Region temp:this.regions)
+				{
+					writer.write("<region name=\""+temp.name+"\">");
+					if(temp.states.size()>0)
+					{
+						
+						for(State state:temp.states)
+						{
+							if(!state.hasOutGoingStateExceptGivenState(temp.entryState, this))
+							{
+								this.generateNodeTrace(state, temp.entryState);
+								writer.write("<node name=\""+state.name+"\">");
+								writer.newLine();
+								printFaultTree(writer, state);
+								writer.write("</node>");
+								writer.newLine();
+							}
+						}
+					}
+					writer.write("</region>");
+				}
+			}
+		}
+	}
+
+	public void printFaultTree(BufferedWriter writer, State state) throws IOException {
+		LinkedList<SubNode> tempS=new LinkedList<>();
+		if(state.nodes.size()>0)
+		{
+			for(SubNode node:state.nodes)
+			{
+				tempS.add(node);
+				
+				writer.write("<node name=\""+state.name+"\">");
+				writer.newLine();
+				writer.write("<state name=\""+node.state.name+"\" id=\"state.id\" tid=\""+node.transition.id+"\">"+state.name+"</state>");
+				writer.newLine();
+				if(node.events.size()>0)
+				{
+					for(String event:node.events)
+					{
+						writer.write("<event name=\""+event+"\">"+event+"</>");
+						writer.newLine();
+					}
+					
+				}
+				printFaultTree(writer, node.state);
+				writer.write("</node>");
+				writer.newLine();
+				
+			}
+		}
+	}
+	
+	
+	public Transition getTransition(String id)
+	{
+		Transition result=null;
+		if(this.transitions.size()>0)
+		{
+			for(Transition t:this.transitions)
+			{
+				if(t.id.equals(id))
+				{
+					result=t;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	public State getState(String id)
+	{
+		State result=null;
+		if(this.states.size()>0)
+		{
+			for(State t:this.states)
+			{
+				if(t.id.equals(id))
+				{
+					result=t;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
 	public void generateConfigurableStatechart(String path, String file, String name) {
 		BufferedReader br = null;
 		FileReader fr = null;

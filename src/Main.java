@@ -27,6 +27,7 @@ public class Main {
 			System.out.println("4. Show Implicit Execution Pattern");
 			System.out.println("5. Show Possible Incorrect Execution Pattern");
 			System.out.println("6. Replace Implicit Constants with Customized Method");
+			System.out.println("7. Generate Fault Tree");
 			Scanner scanner=new Scanner(System.in);
 			while (true) {
 				int option = scanner.nextInt();
@@ -61,6 +62,14 @@ public class Main {
 					String name=scanner.next();
 					statechart.generateConfigurableStatechart(file_path, file_path+"CardiacArrestCombo.sct", name);
 				}
+				else if(option==7)
+				{
+//					System.out.println("Please input the name of variable you want to change to configurable variable:");
+//					String name=scanner.next();
+//					statechart.generateConfigurableStatechart(file_path, file_path+"CardiacArrestCombo.sct", name);
+					String path="C:\\Users\\DaoDao\\Desktop\\statechart\\fault_tree.xml";
+					statechart.generateFaultTree(path, null);
+				}
 				
 				System.out.println("Please input function option:");
 				System.out.println("1. Show Constants or Implicit Constants in the Statechart");
@@ -69,6 +78,7 @@ public class Main {
 				System.out.println("4. Show Implicit Execution Pattern");
 				System.out.println("5. Show Possible Incorrect Execution Pattern");
 				System.out.println("6. Replace Implicit Constants with Customized Method");
+				System.out.println("7. Generate Fault Tree");
 			}
 			
 		} catch (Exception e) {

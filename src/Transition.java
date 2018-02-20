@@ -11,9 +11,13 @@ public class Transition {
 	public String domain_name;
 	public String id;
 	public LinkedList<String> raised_events=new LinkedList<>();
+	public LinkedList<String> used_events=new LinkedList<>();
 	public HashSet<UpdatedVariable> updated_variables=new HashSet<>();
 	public LinkedList<String> used_variables=new LinkedList<>();
 	public HashSet<String> actionSet=new HashSet<>();
+	
+	public String specification;
+	
 	public Transition(String id, String from, String to)
 	{
 		this.id=id;
@@ -38,7 +42,7 @@ public class Transition {
 	
 	public void addUsedEvent(String item)
 	{
-		this.raised_events.add(item);
+		this.used_events.add(item);
 	}
 	
 	public void addActionSet(String name)
