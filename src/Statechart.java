@@ -756,6 +756,8 @@ public class Statechart {
 			bw = new BufferedWriter(fw);
 
 			String newName = "";
+			
+			
 			if (name.contains(".")) {
 				String[] names = name.split("\\.");
 				newName = names[0] + ".get_" + names[1] + "()";
