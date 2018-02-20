@@ -556,7 +556,7 @@ public class Statechart {
 	}
 
 	
-	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents) {
+	public void generateNodeTrace(State targetState, State entry, HashSet<String> parents, int level) {
 		boolean isEntry = false;
 
 		if (targetState!=null&&targetState.incoming_transitions.size() > 0) {
@@ -571,12 +571,12 @@ public class Statechart {
 			if (isEntry) {
 				return;
 			} else {
-				System.out.println("Parent State " + targetState.name);
+				System.out.println("Parent State " + targetState.name +" at level "+level);
 			}
 
 			for (String tid : targetState.incoming_transitions) {
 				Transition ts = this.getTransition(tid);
-				if (ts != null && !targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
+				if (ts != null&&!ts.hasAlways&&!ts.specification.contains("always")&&!targetState.id.equals(ts.from_state) && !parents.contains(ts.from_state)) {
 
 					SubNode node = new SubNode();
 					State nextstate = this.getState(ts.from_state);
@@ -595,9 +595,19 @@ public class Statechart {
 					}
 					targetState.nodes.add(node);
 					parents.add(targetState.id);
-
-					this.generateNodeTrace(nextstate, entry, parents);
-					System.out.println("State " + node.state.name);
+					if(node.events.size()>0)
+					{
+						System.out.print("####events required: at node( "+node.state.name+")#####" );
+						for(String event:node.events)
+						{
+							System.out.print(event+"  " );
+						}
+						System.out.println();
+					}
+					
+					this.generateNodeTrace(nextstate, entry, parents, level+1);
+					System.out.println("State " + node.state.name +"  at level "+level);
+					
 				}
 
 			}
@@ -623,7 +633,7 @@ public class Statechart {
 							if(state.isEntry==0&&!state.hasOutGoingStateExceptGivenState(temp.entryState, this))
 							{
 								HashSet<String> parents=new HashSet<>();
-								this.generateNodeTrace(state, temp.entryState, parents);
+								this.generateNodeTrace(state, temp.entryState, parents, 0);
 								writer.write("<node name=\""+state.name+"\">");
 								writer.newLine();
 								printFaultTree(writer, state);
@@ -650,7 +660,7 @@ public class Statechart {
 						if(targetState!=null)
 						{
 							HashSet<String> parents=new HashSet<>();
-							this.generateNodeTrace(targetState, temp.entryState, parents);
+							this.generateNodeTrace(targetState, temp.entryState, parents, 0);
 							writer.write("<node name=\""+targetState.name+"\">");
 							writer.newLine();
 							printFaultTree(writer, targetState);

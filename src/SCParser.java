@@ -208,8 +208,8 @@ public class SCParser {
 									String targetid = eElement_transition.getAttribute("target");
 									Transition temp_transition = new Transition(tid, state.id, targetid);
 									String specification_trans = eElement_transition.getAttribute("specification");
-									temp_transition.specification=specification;
-									if(specification.contains("always"))
+									temp_transition.specification=specification_trans;
+									if(specification_trans.contains("always"))
 									{
 										temp_transition.hasAlways=true;
 									}
