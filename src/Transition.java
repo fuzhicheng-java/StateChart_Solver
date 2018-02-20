@@ -15,7 +15,7 @@ public class Transition {
 	public HashSet<UpdatedVariable> updated_variables=new HashSet<>();
 	public LinkedList<String> used_variables=new LinkedList<>();
 	public HashSet<String> actionSet=new HashSet<>();
-	
+	public boolean hasAlways=false;
 	public String specification;
 	
 	public Transition(String id, String from, String to)

@@ -209,6 +209,10 @@ public class SCParser {
 									Transition temp_transition = new Transition(tid, state.id, targetid);
 									String specification_trans = eElement_transition.getAttribute("specification");
 									temp_transition.specification=specification;
+									if(specification.contains("always"))
+									{
+										temp_transition.hasAlways=true;
+									}
 									if (specification_trans!=null&&!specification_trans.equals("")) {
 										specification_trans=this.replaceSymbols(specification_trans);
 										String[] tempinfo1 = specification_trans.split("/");
