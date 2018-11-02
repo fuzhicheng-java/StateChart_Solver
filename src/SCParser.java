@@ -26,13 +26,13 @@ public class SCParser {
 	public void initStates(Document doc, Statechart statechart) {
 		NodeList regions = doc.getElementsByTagName("regions");
 		for (int i = 0; i < regions.getLength(); i++) {
-			
+
 			Node nNode = regions.item(i);
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element eElement = (Element) nNode;
 				String domain_name = eElement.getAttribute("name");
 				String domain_id = eElement.getAttribute("xmi:id");
-				Region s_region=new Region(domain_id, domain_name);
+				Region s_region = new Region(domain_id, domain_name);
 				NodeList states = eElement.getElementsByTagName("vertices");
 				for (int j = 0; j < states.getLength(); j++) {
 					Node nNode_state = states.item(j);
@@ -40,29 +40,23 @@ public class SCParser {
 						Element eElement_state = (Element) nNode_state;
 						String sname = eElement_state.getAttribute("name");
 						String sid = eElement_state.getAttribute("xmi:id");
-						String entry=eElement_state.getAttribute("xsi:type");
+						String entry = eElement_state.getAttribute("xsi:type");
 						State state = new State(domain_id, domain_name, sid, sname, entry);
-						if(state.isEntry==1)
-						{
-							s_region.entryState=state;
+						if (state.isEntry == 1) {
+							s_region.entryState = state;
 						}
-						
+
 						String specification = eElement_state.getAttribute("specification");
-						state.specification=specification;
+						state.specification = specification;
 						if (specification != null && !specification.equals("")) {
-							specification=this.replaceSymbols(specification);
-							specification=specification.replaceAll("\nentry", ";entry");
-							specification=specification.replaceAll("\noncycle", ";oncycle");
-							specification=specification.replaceAll("\nexit", ";exit");
-							specification=specification.replaceAll("\n", "");
-							specification=specification.replaceAll("\r", "");
-							specification=specification.replaceAll("\\s+", "");
-							
-							if(specification.contains("oncycle"))
-							{
-								System.out.println("test Done!");
-							}
-							
+							specification = this.replaceSymbols(specification);
+							specification = specification.replaceAll("\nentry", ";entry");
+							specification = specification.replaceAll("\noncycle", ";oncycle");
+							specification = specification.replaceAll("\nexit", ";exit");
+							specification = specification.replaceAll("\n", "");
+							specification = specification.replaceAll("\r", "");
+							specification = specification.replaceAll("\\s+", "");
+
 							if (statechart.events.size() > 0) {
 								for (Event e : statechart.events) {
 									if (specification.contains(e.name)) {
@@ -70,20 +64,18 @@ public class SCParser {
 									}
 								}
 							}
-							
+
 							String[] infos = specification.split(";");
 							if (infos.length > 0) {
-								for (String item : infos) 
-								{
-									item=item.replaceAll("entry/", "");
-									item=item.replaceAll("oncycle/", "");
-									item=item.replaceAll("exit/", "");
-									if(item.contains("/")&&item.contains("["))
-									{
+								for (String item : infos) {
+									item = item.replaceAll("entry/", "");
+									item = item.replaceAll("oncycle/", "");
+									item = item.replaceAll("exit/", "");
+									if (item.contains("/") && item.contains("[")) {
 										String used = item.substring(item.indexOf("[") + 1);
 										used = used.substring(0, used.indexOf("]"));
-										used=used.replaceAll("&&", ";");
-										used=used.replaceAll("\\|\\|", ";");
+										used = used.replaceAll("&&", ";");
+										used = used.replaceAll("\\|\\|", ";");
 										String[] infos1 = used.split(";");
 										if (infos1.length > 0) {
 											for (String item1 : infos1) {
@@ -91,100 +83,95 @@ public class SCParser {
 												String[] iteminfo = item1.split("[=<>]");
 												state.addUsedVariableInEntryCondition(iteminfo[0].trim());
 												Variable.addUsedState(statechart, iteminfo[0].trim(), state.id, null);
-												String[] usedVs = iteminfo[1].split("[-+*/^%!]");
-												for (String var : usedVs) {
-													if (!var.equals("")) {
-														if(var.contains("(")&&var.contains(")"))
-														{
-															String[] test1=var.split("(");
-															state.addUsedVariableInEntryCondition(test1[0].trim()+"()");
-															String used1 = var
-																	.substring(var.indexOf("(") + 1);
-															used1 = used1.substring(0, used1.indexOf(")"));
-															if(used1!=null&&!used1.equals(""))
-															{
-																test1=used1.split(",");
-																for(String s:test1)
-																{
-																	if(statechart.isVariable(s.trim()))
-																	{
-																		state.addUsedVariableInEntryCondition(var.trim());
-																		Variable.addUsedState(statechart, var.trim(), state.id, null);
+												if (iteminfo.length > 1) {
+													String[] usedVs = iteminfo[1].split("[-+*/^%!]");
+													for (String var : usedVs) {
+														if (!var.equals("")) {
+															if (!(var.startsWith("\"") && var.endsWith("\""))
+																	&& var.contains("(") && var.contains(")")) {
+																String[] test1 = var.split("(");
+																state.addUsedVariableInEntryCondition(
+																		test1[0].trim() + "()");
+																String used1 = var.substring(var.indexOf("(") + 1);
+																used1 = used1.substring(0, used1.indexOf(")"));
+																if (used1 != null && !used1.equals("")) {
+																	test1 = used1.split(",");
+																	for (String s : test1) {
+																		if (statechart.isVariable(s.trim())) {
+																			state.addUsedVariableInEntryCondition(
+																					var.trim());
+																			Variable.addUsedState(statechart,
+																					var.trim(), state.id, null);
+																		}
 																	}
 																}
+
+															} else {
+																state.addUsedVariableInEntryCondition(var.trim());
+																Variable.addUsedState(statechart, var.trim(), state.id,
+																		null);
 															}
-															
+
 														}
-														else
-														{
-															state.addUsedVariableInEntryCondition(var.trim());
-															Variable.addUsedState(statechart, var.trim(), state.id, null);
-														}
-														
 													}
 												}
 											}
 										}
-										
-										String[] test1=item.split("/");
-										item=test1[1];
+
+										String[] test1 = item.split("/");
+										item = test1[1];
 									}
-									
-									
+
 									if (item.startsWith("raise")) {
 										String[] iteminfo = item.split("\\s+");
 										String vname = iteminfo[1];
-										//Event event=new Event(vname, state.id, 1);
+										// Event event=new Event(vname, state.id, 1);
 										state.addRaisedEvent(vname);
-										state.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
+										state.addActionSet(item.replaceAll("\\s+", "").replaceAll(";", ""));
 									} else {
 										if (item.contains("=")) {
-											state.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
+											state.addActionSet(item.replaceAll("\\s+", "").replaceAll(";", ""));
 											item = replaceSymbolsCalculation(item);
 											String[] iteminfo = item.split("=");
 											UpdatedVariable upvar = new UpdatedVariable(iteminfo[0].trim());
-											String[] usedVs = iteminfo[1].split("[-+*/^%!]");
-											for (String var : usedVs) {
-												if (!var.equals("")) {
-													if(var.contains("(")&&var.contains(")"))
-													{
-														String[] test1=var.split("\\(");
-														upvar.addUsedVariable(test1[0].trim()+"()");
-														String used1 = var
-																.substring(var.indexOf("(") + 1);
-														used1 = used1.substring(0, used1.indexOf(")"));
-														if(used1!=null&&!used1.equals(""))
-														{
-															test1=used1.split(",");
-															for(String s:test1)
-															{
-																if(statechart.isVariable(s.trim()))
-																{
-																	upvar.addUsedVariable(var.trim());
-																	Variable.addUsedState(statechart, var.trim(), state.id, upvar.name);
+											if (iteminfo.length > 1) {
+												String[] usedVs = iteminfo[1].split("[-+*/^%!]");
+												for (String var : usedVs) {
+													if (!var.equals("")) {
+														if (var.contains("(") && var.contains(")")) {
+															String[] test1 = var.split("\\(");
+															upvar.addUsedVariable(test1[0].trim() + "()");
+															String used1 = var.substring(var.indexOf("(") + 1);
+															used1 = used1.substring(0, used1.indexOf(")"));
+															if (used1 != null && !used1.equals("")) {
+																test1 = used1.split(",");
+																for (String s : test1) {
+																	if (statechart.isVariable(s.trim())) {
+																		upvar.addUsedVariable(var.trim());
+																		Variable.addUsedState(statechart, var.trim(),
+																				state.id, upvar.name);
+																	}
 																}
 															}
+
+														} else {
+															upvar.addUsedVariable(var.trim());
+															Variable.addUsedState(statechart, var.trim(), state.id,
+																	upvar.name);
 														}
-														
+
 													}
-													else
-													{
-														upvar.addUsedVariable(var.trim());
-														Variable.addUsedState(statechart, var.trim(), state.id, upvar.name);
-													}
-													
 												}
+												state.addUpdatedVariable(upvar);
+												Variable.addUpdatedState(statechart, upvar.name, state.id);
+
+												Variable.updateBeUpdated(statechart, upvar.name);
+												upvar.type = 1;
+												upvar.location = state.id;
+												Variable.addUsedVariable(statechart, upvar);
 											}
-											state.addUpdatedVariable(upvar);
-											Variable.addUpdatedState(statechart, upvar.name, state.id);
-											
-											Variable.updateBeUpdated(statechart, upvar.name);
-											upvar.type=1;
-											upvar.location=state.id;
-											Variable.addUsedVariable(statechart, upvar);
 										}
 									}
-
 								}
 							}
 						}
@@ -208,13 +195,12 @@ public class SCParser {
 									String targetid = eElement_transition.getAttribute("target");
 									Transition temp_transition = new Transition(tid, state.id, targetid);
 									String specification_trans = eElement_transition.getAttribute("specification");
-									temp_transition.specification=specification_trans;
-									if(specification_trans.contains("always"))
-									{
-										temp_transition.hasAlways=true;
+									temp_transition.specification = specification_trans;
+									if (specification_trans.contains("always")) {
+										temp_transition.hasAlways = true;
 									}
-									if (specification_trans!=null&&!specification_trans.equals("")) {
-										specification_trans=this.replaceSymbols(specification_trans);
+									if (specification_trans != null && !specification_trans.equals("")) {
+										specification_trans = this.replaceSymbols(specification_trans);
 										String[] tempinfo1 = specification_trans.split("/");
 										if (statechart.events.size() > 0) {
 											for (Event e : statechart.events) {
@@ -224,62 +210,76 @@ public class SCParser {
 											}
 										}
 										if (tempinfo1.length > 1) {
-											String[] infos = tempinfo1[1].split("\n");
+											String[] infos = tempinfo1[1].split("[\n;]");
 											if (infos.length > 0) {
 												for (String item : infos) {
 													if (item.startsWith("raise")) {
-														temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
+														temp_transition.addActionSet(
+																item.replaceAll("\\s+", "").replaceAll(";", ""));
 														String[] iteminfo = item.split("\\s+");
 														String vname = iteminfo[1];
-														String ename=vname.replaceAll("\\s+","");
-														//Event event=new Event(ename, tid, 2);
+														String ename = vname.replaceAll("\\s+", "");
+														// Event event=new Event(ename, tid, 2);
 														temp_transition.addRaisedEvent(ename);
-														
+
 													} else {
-														if (item.contains("=")) {
-															temp_transition.addActionSet(item.replaceAll("\\s+","").replaceAll(";", ""));
+														if (item.contains("=")) 
+														{
+															System.out.println(item+"  transition0000");
+															temp_transition.addActionSet(
+																	item.replaceAll("\\s+", "").replaceAll(";", ""));
 															item = replaceSymbolsCalculation(item);
 															String[] iteminfo = item.split("=");
-															
-															UpdatedVariable tupvar = new UpdatedVariable(iteminfo[0].trim());
-															String[] usedVs = iteminfo[1].split("[-+*/^%!]");
-															for (String var : usedVs) {
-																if (!var.equals("")) {
-																	if(var.contains("(")&&var.contains(")"))
-																	{
-																		String[] test1=var.split("(");
-																		tupvar.addUsedVariable(test1[0].trim()+"()");
-																		String used1 = var
-																				.substring(var.indexOf("(") + 1);
-																		used1 = used1.substring(0, used1.indexOf(")"));
-																		if(used1!=null&&!used1.equals(""))
-																		{
-																			test1=used1.split(",");
-																			for(String s:test1)
-																			{
-																				if(statechart.isVariable(s.trim()))
-																				{
-																					tupvar.addUsedVariable(var.trim());
-																					Variable.addUsedTransition(statechart, var.trim(),temp_transition.id, tupvar.name);
+															if (iteminfo.length > 1) {
+																UpdatedVariable tupvar = new UpdatedVariable(
+																		iteminfo[0].trim());
+																String[] usedVs = iteminfo[1].split("[-+*/^%!]");
+																for (String var : usedVs) {
+																	if (!var.equals("")) {
+																		if (!(var.startsWith("\"")
+																				&& var.endsWith("\""))
+																				&& var.contains("(")
+																				&& var.contains(")")) {
+																			System.out.println(var+"  transition");
+																			String[] test1 = var.split("(");
+																			tupvar.addUsedVariable(
+																					test1[0].trim() + "()");
+																			String used1 = var
+																					.substring(var.indexOf("(") + 1);
+																			used1 = used1.substring(0,
+																					used1.indexOf(")"));
+																			if (used1 != null && !used1.equals("")) {
+																				test1 = used1.split(",");
+																				for (String s : test1) {
+																					if (statechart
+																							.isVariable(s.trim())) {
+																						tupvar.addUsedVariable(
+																								var.trim());
+																						Variable.addUsedTransition(
+																								statechart, var.trim(),
+																								temp_transition.id,
+																								tupvar.name);
+																					}
 																				}
 																			}
+
+																		} else {
+																			tupvar.addUsedVariable(var.trim());
+																			Variable.addUsedTransition(statechart,
+																					var.trim(), temp_transition.id,
+																					tupvar.name);
 																		}
-																		
+
 																	}
-																	else
-																	{
-																		tupvar.addUsedVariable(var.trim());
-																		Variable.addUsedTransition(statechart, var.trim(),temp_transition.id, tupvar.name);
-																	}
-																	
 																}
+																temp_transition.addUpdatedVariable(tupvar);
+																Variable.addUpdatedTransition(statechart, tupvar.name,
+																		temp_transition.id);
+																Variable.updateBeUpdated(statechart, tupvar.name);
+																tupvar.type = 1;
+																tupvar.location = state.id;
+																Variable.addUsedVariable(statechart, tupvar);
 															}
-															temp_transition.addUpdatedVariable(tupvar);
-															Variable.addUpdatedTransition(statechart, tupvar.name, temp_transition.id);
-															Variable.updateBeUpdated(statechart, tupvar.name);
-															tupvar.type=1;
-															tupvar.location=state.id;
-															Variable.addUsedVariable(statechart, tupvar);
 														}
 													}
 
@@ -291,43 +291,45 @@ public class SCParser {
 											String used = specification_trans
 													.substring(specification_trans.indexOf("[") + 1);
 											used = used.substring(0, used.indexOf("]"));
-											used=used.replaceAll("&&", ";");
-											used=used.replaceAll("\\|\\|", ";");
+											used = used.replaceAll("&&", ";");
+											used = used.replaceAll("\\|\\|", ";");
 											String[] infos = used.split(";");
 											if (infos.length > 0) {
 												for (String item : infos) {
 													item = replaceSymbolsCalculation(item);
 													String[] iteminfo = item.split("[=<>]");
 													temp_transition.addUsedVariable(iteminfo[0].trim());
-													Variable.addUsedTransition(statechart, iteminfo[0].trim(), temp_transition.id, null);
-													String[] usedVs = iteminfo[1].split("[-+*/^%]");
-													for (String var : usedVs) {
-														if (!var.equals("")) {
-															if(var.contains("(")&&var.contains(")"))
-															{
-																String[] test1=var.split("(");
-																temp_transition.addUsedVariable(test1[0].trim()+"()");
-																String used1 = var
-																		.substring(var.indexOf("(") + 1);
-																used1 = used1.substring(0, used1.indexOf(")"));
-																if(used1!=null&&!used1.equals(""))
-																{
-																	test1=used1.split(",");
-																	for(String s:test1)
-																	{
-																		if(statechart.isVariable(s.trim()))
-																		{
-																			 temp_transition.addUsedVariable(var.trim());
-																			 Variable.addUsedTransition(statechart, var.trim(), temp_transition.id, null);
+													Variable.addUsedTransition(statechart, iteminfo[0].trim(),
+															temp_transition.id, null);
+													if (iteminfo.length > 1) {
+														String[] usedVs = iteminfo[1].split("[-+*/^%]");
+														for (String var : usedVs) {
+															if (!var.equals("")) {
+																if (!(var.startsWith("\"") && var.endsWith("\""))
+																		&& var.contains("(") && var.contains(")")) {
+																	String[] test1 = var.split("(");
+																	temp_transition
+																			.addUsedVariable(test1[0].trim() + "()");
+																	String used1 = var.substring(var.indexOf("(") + 1);
+																	used1 = used1.substring(0, used1.indexOf(")"));
+																	if (used1 != null && !used1.equals("")) {
+																		test1 = used1.split(",");
+																		for (String s : test1) {
+																			if (statechart.isVariable(s.trim())) {
+																				temp_transition
+																						.addUsedVariable(var.trim());
+																				Variable.addUsedTransition(statechart,
+																						var.trim(), temp_transition.id,
+																						null);
+																			}
 																		}
 																	}
+
+																} else {
+																	temp_transition.addUsedVariable(var.trim());
+																	Variable.addUsedTransition(statechart, var.trim(),
+																			temp_transition.id, null);
 																}
-																
-															}
-															else
-															{
-															    temp_transition.addUsedVariable(var.trim());
-															    Variable.addUsedTransition(statechart, var.trim(), temp_transition.id, null);
 															}
 														}
 													}
@@ -353,27 +355,26 @@ public class SCParser {
 	}
 
 	public String replaceSymbolsCalculation(String item) {
-		item=item.replaceAll("\\+=", "=");
-		item=item.replaceAll("-=", "=");
-		item=item.replaceAll("/=", "=");
-		item=item.replaceAll("\\*=", "=");
-		item=item.replaceAll("\n", "");
-		item=item.replaceAll("==", "=");
-		item=item.replaceAll("<=", "<");
-		item=item.replaceAll(">=", ">");
-		item=item.replaceAll("&&", "/");
-		item=item.replaceAll("!", "");
-		item=item.replaceAll("\\|\\|", "/");
+		item = item.replaceAll("\\+=", "=");
+		item = item.replaceAll("-=", "=");
+		item = item.replaceAll("/=", "=");
+		item = item.replaceAll("\\*=", "=");
+		item = item.replaceAll("\n", "");
+		item = item.replaceAll("==", "=");
+		item = item.replaceAll("<=", "<");
+		item = item.replaceAll(">=", ">");
+		item = item.replaceAll("&&", "/");
+		item = item.replaceAll("!", "");
+		item = item.replaceAll("\\|\\|", "/");
 		return item;
 	}
 
 	public String replaceSymbols(String specification_trans) {
-		specification_trans=specification_trans.replaceAll("!", "");
-		//specification_trans=specification_trans.replaceAll("entry/", "");
+		specification_trans = specification_trans.replaceAll("!", "");
+		// specification_trans=specification_trans.replaceAll("entry/", "");
 		return specification_trans;
 	}
-	
-	
+
 	public void initVariables_Events(Document doc, Statechart statechart) {
 		NodeList variables = doc.getElementsByTagName("sgraph:Statechart");
 		for (int i = 0; i < variables.getLength(); i++) {
@@ -383,7 +384,7 @@ public class SCParser {
 
 				String specification = eElement.getAttribute("specification");
 				String domain_id = eElement.getAttribute("xmi:id");
-				specification=this.replaceSymbols(specification);
+				specification = this.replaceSymbols(specification);
 				String[] infos = specification.split("\n");
 				if (infos.length > 0) {
 					String prefix = "";
@@ -402,36 +403,39 @@ public class SCParser {
 						}
 
 						if (item.startsWith("const")) {
-							String[] iteminfo =item.split("\\s+");
+							String[] iteminfo = item.split("\\s+");
 							iteminfo = iteminfo[1].split(":");
 							String vname = prefix + iteminfo[0];
-							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(), Variable.constant);
+							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(),
+									Variable.constant);
 							statechart.addVariable(var);
 						} else if (item.startsWith("var")) {
 							String[] iteminfo = item.split("\\s+");
 							iteminfo = iteminfo[1].split(":");
 							String vname = prefix + iteminfo[0];
-							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(), Variable.local);
+							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(),
+									Variable.local);
 							statechart.addVariable(var);
-						} else if (item.startsWith("event")||item.startsWith("in event")||item.startsWith("out event")) {
-							item=item.replaceAll("in event", "event");
-							item=item.replaceAll("out event", "event");
-							String[] iteminfo =item.split("\\s+");
+						} else if (item.startsWith("event") || item.startsWith("in event")
+								|| item.startsWith("out event")) {
+							item = item.replaceAll("in event", "event");
+							item = item.replaceAll("out event", "event");
+							String[] iteminfo = item.split("\\s+");
 							iteminfo = iteminfo[1].split(":");
 							String vname = prefix + iteminfo[0];
 							Event var = new Event(domain_id.trim(), domain_name.trim(), vname.trim());
 							statechart.addEvent(var);
-						}
-						else if (item.startsWith("operation")) {
-							String[] iteminfo =item.split("\\s+");
-							String[]iteminfo1 = iteminfo[1].split("\\(");
-							String vname = prefix + iteminfo1[0]+"()";
-							
-							iteminfo1=iteminfo[1].split("\\)");
-							String fullName = prefix + iteminfo1[0]+")";
-							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(), Variable.local);
-							var.type=1;
-							var.full_name=fullName.trim();
+						} else if (item.startsWith("operation")) {
+							String[] iteminfo = item.split("\\s+");
+							String[] iteminfo1 = iteminfo[1].split("\\(");
+							String vname = prefix + iteminfo1[0] + "()";
+
+							iteminfo1 = iteminfo[1].split("\\)");
+							String fullName = prefix + iteminfo1[0] + ")";
+							Variable var = new Variable(domain_id.trim(), domain_name.trim(), vname.trim(),
+									Variable.local);
+							var.type = 1;
+							var.full_name = fullName.trim();
 							statechart.addVariable(var);
 						}
 

@@ -25,7 +25,7 @@ public class Variable {
 		this.name=name;
 		if(this.name.contains("."))
 		{
-			String[] names=name.split(".");
+			String[] names=name.split("\\.");
 			this.interface_name=names[1];
 			this.interface_head=names[0];
 		}

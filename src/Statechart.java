@@ -154,7 +154,7 @@ public class Statechart {
 					{
 						if(var.name.contains("."))
 						{
-							String[] names=var.name.split(".");
+							String[] names=var.name.split("\\.");
 							if(var_patterns.containsKey(names[0]))
 							{
 								var_patterns.get(names[0]).add(var.name);

@@ -21,6 +21,7 @@ public class Main {
 			statechart.initExecutionPattern();
 			//statechart.traceFailedPath_Constant(failed_path);
 			System.out.println("Please input function option:");
+			System.out.println("0. Show related variable updated patterns in the Statechart");
 			System.out.println("1. Show Constants or Implicit Constants in the Statechart");
 			System.out.println("2. Show Single Variable Impaction");
 			System.out.println("3. Show Single Variable Tree Structure");
