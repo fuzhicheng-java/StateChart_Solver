@@ -48,7 +48,15 @@ public class Statechart {
 		{
 			for(String temp:this.assumption_strings)
 			{
-				System.out.println(temp);
+				temp=temp.replaceAll("\\*", "");
+				temp=temp.replaceAll("/", "");
+				String[] values=temp.split("@");
+				String assumption="";
+				for(int i=1;i<values.length;i++)
+				{
+					assumption+=values[i];
+				}
+				System.out.println(assumption);
 			}
 		}
 	}
