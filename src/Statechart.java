@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class Statechart {
 	public Map<HashSet<String>, Integer> actionMap = new HashMap();
 	public LinkedList<Region> regions=new LinkedList<>();
 	public LinkedList<String> entryTransition=new LinkedList<>();
-
+	public List<String> assumption_strings;
 	// public LinkedList<ActionSet> actionSets=new LinkedList<>();
 	public void addState(State state) {
 		this.states.add(state);
@@ -39,6 +40,17 @@ public class Statechart {
 
 	public void addTransition(Transition transition) {
 		this.transitions.add(transition);
+	}
+	
+	
+	public void getAssumptionList() {
+		if(this.assumption_strings.size()>0)
+		{
+			for(String temp:this.assumption_strings)
+			{
+				System.out.println(temp);
+			}
+		}
 	}
 
 	public void traceFailedPath_Constant(String path) {

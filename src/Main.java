@@ -29,6 +29,8 @@ public class Main {
 			System.out.println("5. Show Possible Incorrect Execution Pattern");
 			System.out.println("6. Replace Implicit Constants with Customized Method");
 			System.out.println("7. Generate Fault Tree");
+			System.out.println("8. Get Assumption List:");
+
 			Scanner scanner=new Scanner(System.in);
 			while (true) {
 				int option = scanner.nextInt();
@@ -75,6 +77,10 @@ public class Main {
 					String path="C:\\Users\\DaoDao\\Desktop\\statechart\\fault_tree.xml";
 					statechart.generateFaultTree(path, regionName, nodeName);
 				}
+				else if(option==8)
+				{
+					statechart.getAssumptionList();
+				}
 				
 				System.out.println("Please input function option:");
 				System.out.println("0. Show related variable updated patterns in the Statechart");
@@ -85,6 +91,7 @@ public class Main {
 				System.out.println("5. Show Possible Incorrect Execution Pattern");
 				System.out.println("6. Replace Implicit Constants with Customized Method");
 				System.out.println("7. Generate Fault Tree");
+				System.out.println("8. Get Assumption List:");
 			}
 			
 		} catch (Exception e) {

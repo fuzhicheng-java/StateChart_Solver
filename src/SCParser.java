@@ -385,6 +385,7 @@ public class SCParser {
 				String specification = eElement.getAttribute("specification");
 				String domain_id = eElement.getAttribute("xmi:id");
 				specification = this.replaceSymbols(specification);
+				statechart.assumption_strings=Tools.getAllMatches(specification, "/\\* [\\w|\\W]*\\*/");
 				String[] infos = specification.split("\n");
 				if (infos.length > 0) {
 					String prefix = "";
