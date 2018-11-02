@@ -17,7 +17,7 @@ public class Main {
 		Statechart statechart=new Statechart();
 		SCParser sp=new SCParser();
 		try {
-			sp.readStatechart(file_path+"CardiacArrestCombo.sct", statechart);
+			sp.readStatechart(file_path+"SepsisWorkflow.sct", statechart);
 			statechart.initExecutionPattern();
 			//statechart.traceFailedPath_Constant(failed_path);
 			System.out.println("Please input function option:");
@@ -31,8 +31,10 @@ public class Main {
 			Scanner scanner=new Scanner(System.in);
 			while (true) {
 				int option = scanner.nextInt();
-
-				if (option == 1) {
+				if (option == 0) {
+					statechart.getChangedVariablesPattern();
+				}
+				else if (option == 1) {
 					statechart.getUnChangedVariablesInfo();
 				} else if(option==2){
 					System.out.println("Please input the name of variable/event/operation:");
@@ -74,6 +76,7 @@ public class Main {
 				}
 				
 				System.out.println("Please input function option:");
+				System.out.println("0. Show related variable updated patterns in the Statechart");
 				System.out.println("1. Show Constants or Implicit Constants in the Statechart");
 				System.out.println("2. Show Single Variable Impaction");
 				System.out.println("3. Show Single Variable Tree Structure");

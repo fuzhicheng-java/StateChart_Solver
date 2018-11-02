@@ -142,6 +142,60 @@ public class Statechart {
 		}
 	}
 
+	
+	public void getChangedVariablesPattern() {
+		if (this.states.size() > 0) {
+			HashMap<String, Set<String>> var_patterns=new HashMap<>();
+			for (State state : this.states) 
+			{
+				if(state.updated_variables.size()>1)
+				{
+					for(UpdatedVariable var:state.updated_variables)
+					{
+						if(var.name.contains("."))
+						{
+							String[] names=var.name.split(".");
+							if(var_patterns.containsKey(names[0]))
+							{
+								var_patterns.get(names[0]).add(var.name);
+							}
+							else
+							{
+								Set<String> temp=new HashSet<>();
+								temp.add(var.name);
+								var_patterns.put(names[0], temp);
+							}
+						}
+						else
+						{
+							if(var_patterns.containsKey("internal"))
+							{
+								var_patterns.get("internal").add(var.name);
+							}
+							else
+							{
+								Set<String> temp=new HashSet<>();
+								temp.add(var.name);
+								var_patterns.put("internal", temp);
+							}
+						}
+					}
+				}
+			}
+			
+			Iterator it = var_patterns.entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry<String, Set<String>> pair = (Map.Entry<String, Set<String>>)it.next();
+	        	    System.out.print(pair.getKey() + ":::: ");
+		        for(String temp:pair.getValue())
+		        {
+		        	   System.out.print(temp + ";;; ");
+		        }
+		        System.out.println("-----------------------");
+		    }
+		}
+	}
+	
 	public void getUnChangedVariablesInfo() {
 		if (this.variables.size() > 0) {
 			for (Variable var : this.variables) {

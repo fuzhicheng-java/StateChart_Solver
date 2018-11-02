@@ -6,6 +6,8 @@ public class Variable {
 	public String domain_name;
 	public String domain_id;
 	public String name;
+	public String interface_head="";
+	public String interface_name="";
 	public String full_name;
 	public String id;
 	public int isConsant;
@@ -21,6 +23,12 @@ public class Variable {
 		this.domain_id=domain_id;
 		this.domain_name=domain_name;
 		this.name=name;
+		if(this.name.contains("."))
+		{
+			String[] names=name.split(".");
+			this.interface_name=names[1];
+			this.interface_head=names[0];
+		}
 		this.isConsant=isConsant;
 		this.type=0;
 	}

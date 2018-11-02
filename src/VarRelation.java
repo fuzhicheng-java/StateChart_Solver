@@ -1,5 +1,3 @@
-
-
 public class VarRelation {
 	public String id;
 	public String name;
